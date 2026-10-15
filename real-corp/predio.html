@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Prédio Real Corp</title>
+<style>
+  :root {
+    --fundo: #0f172a; --painel: rgba(15, 23, 42, 0.92); --texto: #f1f5f9; --suave: #94a3b8;
+    --borda: #334155; --botao: #1e293b; --destaque: #f97316;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; width: 100%; overflow: hidden; background: var(--fundo); color: var(--texto);
+    font: 15px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  #cena { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+  #legenda { position: fixed; top: 0; left: 0; right: 0; padding: 10px 16px; padding-top: max(10px, env(safe-area-inset-top));
+    background: linear-gradient(var(--painel), rgba(15,23,42,0)); font-weight: 600; min-height: 44px; pointer-events: none; }
+  #legenda small { display: block; font-weight: 400; color: var(--suave); }
+  #barra { position: fixed; left: 0; right: 0; bottom: 0; display: flex; gap: 8px; padding: 10px 16px;
+    padding-bottom: max(10px, env(safe-area-inset-bottom)); background: linear-gradient(rgba(15,23,42,0), var(--painel)); }
+  #barra button { flex: 1 1 0; min-width: 0; }
+  button { min-height: 44px; min-width: 44px; border-radius: 10px; border: 1px solid var(--borda); background: var(--botao);
+    color: var(--texto); font: inherit; font-weight: 600; padding: 0 10px; cursor: pointer; }
+  button:disabled { opacity: 0.5; }
+  button.principal { background: var(--destaque); border-color: var(--destaque); color: #111827; }
+  #info { position: fixed; left: 16px; right: 16px; bottom: 80px; max-width: 480px; margin: 0 auto; background: var(--painel);
+    border: 1px solid var(--borda); border-radius: 14px; padding: 14px 16px; display: none; }
+  #info.aberto { display: block; }
+  #info h2 { margin: 0 44px 6px 0; font-size: 17px; }
+  #info dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; }
+  #info dt { color: var(--suave); }
+  #info dd { margin: 0; overflow-wrap: anywhere; }
+  #fechar { position: absolute; top: 6px; right: 6px; }
+  #erro { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; padding: 24px; text-align: center; }
+  #erro.visivel { display: flex; }
+  #erro div { max-width: 420px; background: var(--painel); border: 1px solid #ef4444; border-radius: 14px; padding: 18px; }
+</style>
+</head>
+<body>
+<canvas id="cena" aria-label="Prédio 3D da Real Corp"></canvas>
+<div id="legenda" aria-live="polite">Real Corp · 7 andares, 10 agentes<small>Toque num andar ou num agente. Arraste para girar, pinça para zoom.</small></div>
+<div id="info" role="dialog" aria-labelledby="info-titulo">
+  <button id="fechar" aria-label="Fechar">✕</button>
+  <h2 id="info-titulo"></h2>
+  <dl><dt>Função</dt><dd id="info-funcao"></dd><dt>Modelo</dt><dd id="info-modelo"></dd>
+      <dt>Ferramentas</dt><dd id="info-tools"></dd><dt>Quando usar</dt><dd id="info-quando"></dd></dl>
+</div>
+<div id="barra">
+  <button id="abaixo" aria-label="Andar abaixo">▼ Andar</button>
+  <button id="missao" class="principal">Rodar missão</button>
+  <button id="acima" aria-label="Andar acima">▲ Andar</button>
+</div>
+<div id="erro" role="alert"><div><strong>Não foi possível carregar o 3D.</strong><br>A biblioteca three.js (jsDelivr) não respondeu. Confira a conexão e recarregue a página.</div></div>
+
+<script>
+  // Falha do CDN: mensagem clara em vez de tela em branco.
+  window.__realcorp = { pronto: false, erro: null, andares: 0, personagens: 0, missao: 'parado' };
+  function falhaCDN(motivo) {
+    window.__realcorp.erro = motivo;
+    document.getElementById('erro').classList.add('visivel');
+  }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js" onerror="falhaCDN('three')"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js" onerror="falhaCDN('OrbitControls')"></script>
+<script>
+(function () {
+  'use strict';
+  if (typeof THREE === 'undefined' || !THREE.OrbitControls) {
+    if (!window.__realcorp.erro) falhaCDN('three indisponível');
+    return;
+  }
+
+  // Dados de docs/EMPRESA.md, embutidos.
+  var AGENTES = {
+    ceo: { nome: 'CEO', funcao: 'Fala com o dono, pesquisa, decide e delega', modelo: 'sessão principal', tools: 'todas da sessão', quando: 'Sempre: é a porta de entrada' },
+    promotor: { nome: 'Promotor', funcao: 'Ataca a ideia com fatos e vota', modelo: 'haiku', tools: 'Read, Grep, Glob', quando: 'Tribunal, decisão grande' },
+    defensor: { nome: 'Defensor', funcao: 'Defende a menor versão viável e vota', modelo: 'haiku', tools: 'Read, Grep, Glob', quando: 'Tribunal, decisão grande' },
+    jurado: { nome: 'Jurado', funcao: 'Avalia custo e segurança e vota', modelo: 'haiku', tools: 'Read, Grep, Glob', quando: 'Tribunal, decisão grande' },
+    juiz: { nome: 'Juiz', funcao: 'Conta os votos e dá o veredito com condições', modelo: 'sonnet', tools: 'Read', quando: 'Depois dos 3 pareceres' },
+    rea: { nome: 'REA', funcao: 'Engenharia reversa autorizada com o REA', modelo: 'sonnet', tools: 'Read, Write, Grep, Glob, Bash', quando: 'Software próprio, aberto ou com autorização escrita' },
+    organizador: { nome: 'Organizador', funcao: 'Transforma o pedido em plano curto', modelo: 'haiku', tools: 'Read, Grep, Glob, Write', quando: 'Antes de construir' },
+    construtor: { nome: 'Construtor', funcao: 'Escreve ou edita código, 1 passo por vez', modelo: 'sonnet', tools: 'Read, Write, Edit, Grep, Glob', quando: 'Implementar um passo do plano' },
+    executor: { nome: 'Executor', funcao: 'Roda comandos do plano com segurança', modelo: 'haiku', tools: 'Read, Bash', quando: 'Instalar, build, migrar, testar' },
+    tester: { nome: 'Tester', funcao: 'Tenta quebrar e diz PASSOU ou FALHOU', modelo: 'haiku (sonnet se o CEO pedir)', tools: 'Read, Grep, Glob, Bash', quando: 'Depois do executor' }
+  };
+  var ANDARES = [ // índice 0 = andar 1
+    { n: 1, nome: 'Testes', cor: 0x8b5cf6, agente: 'tester' },
+    { n: 2, nome: 'Execução', cor: 0x22c55e, agente: 'executor' },
+    { n: 3, nome: 'Construção', cor: 0xec4899, agente: 'construtor' },
+    { n: 4, nome: 'Organização', cor: 0x3b82f6, agente: 'organizador' },
+    { n: 5, nome: 'REA', cor: 0x14b8a6, agente: 'rea' },
+    { n: 6, nome: 'Tribunal', cor: 0xeab308, agente: 'juiz' },
+    { n: 7, nome: 'CEO', cor: 0xf97316, agente: 'ceo' }
+  ];
+  var H = 3, W = 10, D = 6;
+  var reduzido = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var canvas = document.getElementById('cena');
+  var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  var cena = new THREE.Scene();
+  cena.background = new THREE.Color(0x0f172a);
+  var camera = new THREE.PerspectiveCamera(50, 1, 0.1, 200);
+  camera.position.set(16, 13, 30);
+  var controls = new THREE.OrbitControls(camera, canvas);
+  controls.target.set(0, 9, 0);
+  controls.enableDamping = false; // sem loop contínuo
+  controls.enablePan = false;
+  controls.minDistance = 6;
+  controls.maxDistance = 70;
+  controls.maxPolarAngle = Math.PI / 2 - 0.05; // não atravessa o chão
+  controls.update();
+
+  cena.add(new THREE.HemisphereLight(0xffffff, 0x334155, 0.85));
+  var sol = new THREE.DirectionalLight(0xffffff, 0.55);
+  sol.position.set(8, 30, 20);
+  cena.add(sol);
+
+  var mats = {};
+  function mat(cor, extra) {
+    var chave = cor + (extra ? JSON.stringify(extra) : '');
+    if (!mats[chave]) mats[chave] = new THREE.MeshLambertMaterial(Object.assign({ color: cor }, extra || {}));
+    return mats[chave];
+  }
+  function caixa(w, h, d, cor, x, y, z, pai, extra) {
+    var m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat(cor, extra));
+    m.position.set(x, y, z);
+    pai.add(m);
+    return m;
+  }
+  function clarear(cor, f) { return new THREE.Color(cor).lerp(new THREE.Color(0xffffff), f).getHex(); }
+
+  // Chão
+  var chao = new THREE.Mesh(new THREE.PlaneGeometry(80, 80), mat(0x1e293b));
+  chao.rotation.x = -Math.PI / 2;
+  chao.position.y = -0.01;
+  cena.add(chao);
+
+  // Placa com texto
+  function placa(texto, cor) {
+    var c = document.createElement('canvas');
+    c.width = 512; c.height = 128;
+    var g = c.getContext('2d');
+    g.fillStyle = '#' + new THREE.Color(cor).getHexString();
+    g.fillRect(0, 0, 512, 128);
+    g.fillStyle = '#111827';
+    g.font = 'bold 64px system-ui, sans-serif';
+    g.textBaseline = 'middle';
+    g.fillText(texto, 24, 66);
+    var t = new THREE.CanvasTexture(c);
+    var m = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 0.6), new THREE.MeshBasicMaterial({ map: t }));
+    return m;
+  }
+
+  // Boneco articulado de caixas
+  var personagens = [];
+  function boneco(cor, chave, x, y, z, opcoes) {
+    opcoes = opcoes || {};
+    var g = new THREE.Group();
+    var corTronco = opcoes.toga ? 0x111111 : cor;
+    var pernas = [];
+    [-0.13, 0.13].forEach(function (dx) {
+      var p = new THREE.Group(); p.position.set(dx, 0.7, 0); g.add(p);
+      caixa(0.2, 0.7, 0.22, opcoes.toga ? 0x111111 : clarear(cor, 0.15), 0, -0.35, 0, p);
+      pernas.push(p);
+    });
+    caixa(0.55, 0.62, 0.3, corTronco, 0, 1.01, 0, g);
+    if (opcoes.toga) caixa(0.62, 0.5, 0.36, 0x111111, 0, 0.6, 0, g); // saia da toga
+    var bracos = [];
+    [-0.36, 0.36].forEach(function (dx) {
+      var b = new THREE.Group(); b.position.set(dx, 1.28, 0); g.add(b);
+      caixa(0.16, 0.58, 0.18, corTronco, 0, -0.29, 0, b);
+      bracos.push(b);
+    });
+    caixa(0.34, 0.34, 0.32, 0xf1c27d, 0, 1.52, 0, g); // cabeça
+    if (opcoes.gravata) caixa(0.09, 0.42, 0.02, 0xb91c1c, 0, 1.05, 0.16, g);
+    if (opcoes.martelo) {
+      caixa(0.05, 0.36, 0.05, 0x7c4a1e, 0, -0.62, 0.12, bracos[1]);
+      caixa(0.22, 0.1, 0.1, 0x7c4a1e, 0, -0.8, 0.12, bracos[1]);
+    }
+    g.position.set(x, y, z);
+    g.rotation.y = opcoes.virar || 0;
+    g.traverse(function (o) { o.userData.agente = chave; });
+    g.userData = { agente: chave, bracos: bracos, pernas: pernas, baseY: y };
+    personagens.push(g);
+    return g;
+  }
+
+  // Andares
+  var grupos = [];
+  ANDARES.forEach(function (a, i) {
+    var y0 = i * H;
+    var g = new THREE.Group();
+    g.position.y = y0;
+    g.userData.andar = i;
+    var parede = clarear(a.cor, 0.55);
+    caixa(W, 0.15, D, a.cor, 0, 0.075, 0, g); // laje fina
+    caixa(W, H - 0.15, 0.08, parede, 0, H / 2, -D / 2, g); // fundo
+    caixa(0.08, H - 0.15, D, parede, -W / 2, H / 2, 0, g); // laterais (frente aberta)
+    caixa(0.08, H - 0.15, D, parede, W / 2, H / 2, 0, g);
+    [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(function (p) { // pilares
+      caixa(0.22, H, 0.22, 0x475569, p[0] * (W / 2 - 0.11), H / 2, p[1] * (D / 2 - 0.11), g);
+    });
+    var pl = placa(a.n + ' · ' + a.nome, a.cor);
+    pl.position.set(-W / 2 + 1.5, H - 0.55, D / 2 - 0.05);
+    g.add(pl);
+    cena.add(g);
+    grupos.push(g);
+  });
+
+  var piso = 0.15;
+  function andar(n) { return grupos[n - 1]; }
+
+  // 7 · CEO: mesa grande, janela panorâmica
+  (function (g) {
+    caixa(W - 1.2, 1.4, 0.05, 0x7dd3fc, 0, 1.6, -D / 2 + 0.06, g, { transparent: true, opacity: 0.7 });
+    caixa(3.2, 0.12, 1.4, 0x78350f, 0.5, piso + 0.78, -0.6, g);
+    [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(function (p) { caixa(0.1, 0.78, 0.1, 0x78350f, 0.5 + p[0] * 1.45, piso + 0.39, -0.6 + p[1] * 0.6, g); });
+    g.add(boneco(0xf97316, 'ceo', 0.5, piso, -1.8, { gravata: true }));
+  })(andar(7));
+
+  // 6 · Tribunal: bancada elevada do juiz, promotor, defensor, tribuna do jurado
+  (function (g) {
+    caixa(3, 0.9, 1.2, 0x92400e, 0, piso + 0.45, -D / 2 + 0.9, g); // estrado elevado
+    caixa(2.4, 1.1, 0.3, 0xa16207, 0, piso + 0.55, -D / 2 + 1.65, g); // bancada (abaixo do peito do juiz)
+    g.add(boneco(0xeab308, 'juiz', 0, piso + 0.9, -D / 2 + 0.8, { toga: true, martelo: true }));
+    caixa(1.6, 0.8, 0.5, 0xa16207, -2.6, piso + 0.4, 0.8, g);
+    g.add(boneco(0xeab308, 'promotor', -2.6, piso, 1.4, { virar: Math.PI }));
+    caixa(1.6, 0.8, 0.5, 0xa16207, 2.6, piso + 0.4, 0.8, g);
+    g.add(boneco(0xeab308, 'defensor', 2.6, piso, 1.4, { virar: Math.PI }));
+    caixa(1.0, 0.9, 1.0, 0x854d0e, W / 2 - 1.0, piso + 0.45, -0.6, g);
+    g.add(boneco(0xeab308, 'jurado', W / 2 - 1.0, piso + 0.9, -0.6, { virar: -Math.PI / 2 }));
+  })(andar(6));
+
+  // 5 · REA: bancada de laboratório e lupa
+  (function (g) {
+    caixa(3.4, 0.1, 1.1, 0xe2e8f0, -0.8, piso + 0.95, -1.6, g);
+    caixa(3.2, 0.95, 0.9, 0x0f766e, -0.8, piso + 0.47, -1.6, g);
+    var lupa = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.05, 8, 24), mat(0x334155));
+    lupa.position.set(-1.6, piso + 1.35, -1.5); g.add(lupa);
+    caixa(0.07, 0.4, 0.07, 0x334155, -1.6, piso + 1.0, -1.5, g);
+    [0x22d3ee, 0xa7f3d0].forEach(function (c, k) { caixa(0.18, 0.35, 0.18, c, -0.2 + k * 0.5, piso + 1.17, -1.7, g); });
+    g.add(boneco(0x14b8a6, 'rea', 0.8, piso, -0.6));
+  })(andar(5));
+
+  // 4 · Organização: quadro de post-its
+  (function (g) {
+    caixa(4, 1.8, 0.08, 0xf8fafc, -1, 1.5, -D / 2 + 0.12, g);
+    var cores = [0xfde047, 0xf9a8d4, 0x86efac, 0x93c5fd];
+    for (var k = 0; k < 12; k++) caixa(0.42, 0.42, 0.02, cores[k % 4], -2.5 + (k % 6) * 0.6, 1.95 - Math.floor(k / 6) * 0.65, -D / 2 + 0.17, g);
+    g.add(boneco(0x3b82f6, 'organizador', 0.8, piso, -1.2));
+  })(andar(4));
+
+  // 3 · Construção: bancada de ferramentas
+  (function (g) {
+    caixa(3.2, 0.12, 1.1, 0x92400e, -0.8, piso + 0.9, -1.8, g);
+    caixa(3.0, 0.9, 1.0, 0x78350f, -0.8, piso + 0.45, -1.8, g);
+    caixa(0.6, 0.12, 0.12, 0x64748b, -1.4, piso + 1.02, -1.7, g); // martelo
+    caixa(0.06, 0.06, 0.5, 0x7c4a1e, -1.2, piso + 1.0, -1.5, g);
+    caixa(0.5, 0.25, 0.3, 0xdc2626, -0.2, piso + 1.08, -1.9, g); // caixa de ferramentas
+    g.add(boneco(0xec4899, 'construtor', 1.2, piso, -0.8));
+  })(andar(3));
+
+  // 2 · Execução: terminal e rack
+  (function (g) {
+    caixa(1.8, 0.1, 0.9, 0x334155, -1.6, piso + 0.85, -1.9, g);
+    caixa(1.2, 0.8, 0.08, 0x111827, -1.6, piso + 1.35, -2.2, g);
+    caixa(1.05, 0.62, 0.02, 0x16a34a, -1.6, piso + 1.35, -2.15, g);
+    caixa(0.9, 2.3, 0.9, 0x1f2937, 2.6, piso + 1.15, -2.2, g);
+    for (var k = 0; k < 6; k++) caixa(0.7, 0.05, 0.02, 0x4ade80, 2.6, piso + 0.4 + k * 0.33, -1.74, g);
+    g.add(boneco(0x22c55e, 'executor', 0.2, piso, -0.8));
+  })(andar(2));
+
+  // 1 · Testes: monitores e um "inseto" na mesa
+  (function (g) {
+    caixa(3.2, 0.1, 1.0, 0x334155, -0.6, piso + 0.85, -1.9, g);
+    [-1.6, -0.6, 0.4].forEach(function (x) {
+      caixa(0.85, 0.6, 0.06, 0x111827, x, piso + 1.3, -2.25, g);
+      caixa(0.75, 0.5, 0.02, 0xa78bfa, x, piso + 1.3, -2.21, g);
+    });
+    var inseto = new THREE.Mesh(new THREE.SphereGeometry(0.12, 10, 8), mat(0x111111));
+    inseto.scale.set(1, 0.6, 1.4);
+    inseto.position.set(0.9, piso + 0.97, -1.6);
+    g.add(inseto);
+    for (var k = 0; k < 3; k++) caixa(0.34, 0.02, 0.02, 0x111111, 0.9, piso + 0.92, -1.72 + k * 0.12, g);
+    g.add(boneco(0x8b5cf6, 'tester', 1.4, piso, -0.6));
+  })(andar(1));
+
+  // Poço do elevador central (fundo) com cabine
+  var poco = new THREE.Mesh(new THREE.BoxGeometry(1.1, ANDARES.length * H, 1.1), mat(0x94a3b8, { transparent: true, opacity: 0.22 }));
+  poco.position.set(0, ANDARES.length * H / 2, -D / 2 - 0.65);
+  cena.add(poco);
+  var cabine = caixa(0.9, 1.4, 0.9, 0xfacc15, 0, 0.85, -D / 2 - 0.65, cena);
+
+  // Linhas brilhantes do fluxo, com pontos de luz
+  function ancora(n) { return new THREE.Vector3(W / 2 + 0.3, (n - 1) * H + 1.6, D / 2 - 0.6); }
+  function curva(a, b, cor, lado) {
+    var pa = ancora(a), pb = ancora(b);
+    var meio = pa.clone().add(pb).multiplyScalar(0.5);
+    meio.x += lado * (0.9 + Math.abs(a - b) * 0.45);
+    var c = new THREE.QuadraticBezierCurve3(pa, meio, pb);
+    var linha = new THREE.Line(new THREE.BufferGeometry().setFromPoints(c.getPoints(32)), new THREE.LineBasicMaterial({ color: cor }));
+    cena.add(linha);
+    var ponto = new THREE.Mesh(new THREE.SphereGeometry(0.11, 10, 8), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+    ponto.position.copy(c.getPoint(0.3));
+    cena.add(ponto);
+    return { c: c, ponto: ponto, t: Math.random() };
+  }
+  var LIG = {
+    'ceo-tribunal': curva(7, 6, 0xfacc15, 1), 'tribunal-organizador': curva(6, 4, 0x60a5fa, 1),
+    'organizador-construtor': curva(4, 3, 0xf472b6, 1), 'construtor-executor': curva(3, 2, 0x4ade80, 1),
+    'executor-tester': curva(2, 1, 0xa78bfa, 1), 'tester-construtor': curva(1, 3, 0xef4444, -1),
+    'tester-ceo': curva(1, 7, 0xfb923c, 2.2), 'ceo-rea': curva(7, 5, 0x2dd4bf, -1)
+  };
+  var pacote = new THREE.Mesh(new THREE.SphereGeometry(0.22, 12, 10), new THREE.MeshBasicMaterial({ color: 0xfef08a }));
+  pacote.visible = false;
+  cena.add(pacote);
+  var cliente = placa('Cliente', 0xe2e8f0);
+  cliente.position.set(W / 2 + 3.2, 1.2, D / 2 + 1.5);
+  cliente.rotation.y = -0.5;
+  cena.add(cliente);
+
+  // Tocar em qualquer parte do andar (laje, parede, móvel) abre o agente do andar.
+  grupos.forEach(function (g, i) {
+    g.traverse(function (o) { if (o.userData.agente === undefined) o.userData.agente = ANDARES[i].agente; });
+  });
+
+  window.__realcorp.andares = grupos.length;
+  window.__realcorp.personagens = personagens.length;
+
+  // Render sob demanda
+  var pendente = false, animando = false;
+  function pedirRender() { if (!pendente && !document.hidden) { pendente = true; requestAnimationFrame(quadro); } }
+  controls.addEventListener('change', pedirRender);
+  function redimensionar() {
+    var w = window.innerWidth, h = window.innerHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    pedirRender();
+  }
+  window.addEventListener('resize', redimensionar);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) { ultimo = 0; pedirRender(); } });
+
+  // Câmera: distância que faz caber a largura pedida, em pé ou deitado.
+  function distanciaPara(meiaLargura, meiaAltura) {
+    var tv = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+    return Math.max(meiaAltura / tv, meiaLargura / (tv * camera.aspect));
+  }
+  var foco = null, andarAtual = 7;
+  function focar(n) {
+    andarAtual = n;
+    var alvo = new THREE.Vector3(0, (n - 1) * H + 1.4, 0);
+    // Quase de frente e na altura do andar: a laje de cima não tapa a cena.
+    var d = Math.min(40, Math.max(9, distanciaPara(W / 2 + 0.6, H / 2 + 0.6) + D / 2));
+    var pos = alvo.clone().add(new THREE.Vector3(0.22, 0.09, 1).normalize().multiplyScalar(d));
+    if (reduzido) { controls.target.copy(alvo); camera.position.copy(pos); controls.update(); pedirRender(); return; }
+    foco = { t: 0, de: camera.position.clone(), deAlvo: controls.target.clone(), para: pos, paraAlvo: alvo };
+    animar();
+  }
+  document.getElementById('acima').onclick = function () { focar(Math.min(7, andarAtual + 1)); };
+  document.getElementById('abaixo').onclick = function () { focar(Math.max(1, andarAtual - 1)); };
+
+  // Painel de informação ao tocar
+  var info = document.getElementById('info');
+  function mostrar(chave) {
+    var a = AGENTES[chave]; if (!a) return;
+    document.getElementById('info-titulo').textContent = a.nome;
+    document.getElementById('info-funcao').textContent = a.funcao;
+    document.getElementById('info-modelo').textContent = a.modelo;
+    document.getElementById('info-tools').textContent = a.tools;
+    document.getElementById('info-quando').textContent = a.quando;
+    info.classList.add('aberto');
+  }
+  document.getElementById('fechar').onclick = function () { info.classList.remove('aberto'); };
+  var ray = new THREE.Raycaster(), toque = null;
+  canvas.addEventListener('pointerdown', function (e) { toque = { x: e.clientX, y: e.clientY }; });
+  canvas.addEventListener('pointerup', function (e) {
+    if (!toque || Math.hypot(e.clientX - toque.x, e.clientY - toque.y) > 8) return;
+    var r = canvas.getBoundingClientRect();
+    ray.setFromCamera({ x: (e.clientX - r.left) / r.width * 2 - 1, y: -(e.clientY - r.top) / r.height * 2 + 1 }, camera);
+    var hit = ray.intersectObjects(cena.children, true).filter(function (h) { return h.object.userData.agente; })[0];
+    if (hit) mostrar(hit.object.userData.agente);
+  });
+
+  // Missão
+  var legenda = document.getElementById('legenda');
+  function porNome(k) { return personagens.filter(function (p) { return p.userData.agente === k; })[0]; }
+  var PASSOS = [
+    { andar: 7, quem: null, txt: 'Cliente faz um pedido ao CEO', lig: null },
+    { andar: 7, quem: 'ceo', txt: 'CEO pesquisa e vê que é decisão grande', lig: null },
+    { andar: 6, quem: 'promotor', txt: 'Tribunal: promotor vota (1/3)', lig: 'ceo-tribunal' },
+    { andar: 6, quem: 'defensor', txt: 'Tribunal: defensor vota (2/3)', lig: null },
+    { andar: 6, quem: 'jurado', txt: 'Tribunal: jurado vota (3/3)', lig: null },
+    { andar: 6, quem: 'juiz', txt: 'Juiz: APROVADA COM CONDIÇÕES', lig: null },
+    { andar: 4, quem: 'organizador', txt: 'Organizador escreve o plano', lig: 'tribunal-organizador' },
+    { andar: 3, quem: 'construtor', txt: 'Construtor implementa o passo', lig: 'organizador-construtor' },
+    { andar: 2, quem: 'executor', txt: 'Executor roda os comandos', lig: 'construtor-executor' },
+    { andar: 1, quem: 'tester', txt: 'Tester acha um defeito: FALHOU', lig: 'executor-tester' },
+    { andar: 3, quem: 'construtor', txt: 'Volta ao construtor: corrige', lig: 'tester-construtor' },
+    { andar: 2, quem: 'executor', txt: 'Executor roda de novo', lig: 'construtor-executor' },
+    { andar: 1, quem: 'tester', txt: 'Tester: PASSOU, com evidência', lig: 'executor-tester' },
+    { andar: 7, quem: 'ceo', txt: 'CEO recebe o resultado', lig: 'tester-ceo' },
+    { andar: 7, quem: null, txt: 'Cliente recebe a entrega. Missão concluída!', lig: null }
+  ];
+  var DUR = 1700;
+  var missao = null;
+  var btn = document.getElementById('missao');
+  btn.onclick = function () {
+    if (missao) return;
+    info.classList.remove('aberto');
+    missao = { i: -1, t: 0 };
+    window.__realcorp.missao = 'rodando';
+    btn.disabled = true;
+    proximo();
+    animar();
+  };
+  function proximo() {
+    missao.i++; missao.t = 0;
+    var p = PASSOS[missao.i];
+    legenda.innerHTML = (missao.i + 1) + '/' + PASSOS.length + ' · ' + p.txt + '<small>Andar ' + p.andar + '</small>';
+    focar(p.andar);
+    cabine.position.y = (p.andar - 1) * H + 0.85;
+    pacote.visible = !!p.lig;
+  }
+  function pose(p, s) {
+    var b = p.userData.bracos, pe = p.userData.pernas;
+    b[0].rotation.x = -s * 1.2; b[1].rotation.x = s * 0.6;
+    pe[0].rotation.x = s * 0.3; pe[1].rotation.x = -s * 0.3;
+    p.position.y = p.userData.baseY + Math.abs(s) * 0.12;
+  }
+  function passoMissao(dt) {
+    missao.t += dt;
+    var p = PASSOS[missao.i], k = Math.min(1, missao.t / DUR);
+    var quem = p.quem && porNome(p.quem);
+    if (quem && !reduzido) pose(quem, Math.sin(k * Math.PI * 4) * (1 - k));
+    if (p.lig) pacote.position.copy(LIG[p.lig].c.getPoint(reduzido ? 1 : Math.min(1, k * 1.6)));
+    if (missao.t >= DUR) {
+      if (quem) pose(quem, 0);
+      if (missao.i + 1 < PASSOS.length) { proximo(); }
+      else {
+        missao = null; pacote.visible = false; btn.disabled = false;
+        window.__realcorp.missao = 'concluida';
+      }
+    }
+  }
+
+  var ultimo = 0;
+  function animar() { if (!animando) { animando = true; ultimo = 0; pedirRender(); } }
+  function quadro(agora) {
+    pendente = false;
+    var dt = ultimo ? Math.min(100, agora - ultimo) : 16;
+    ultimo = agora;
+    if (foco) {
+      foco.t = Math.min(1, foco.t + dt / 600);
+      var e = foco.t * foco.t * (3 - 2 * foco.t);
+      camera.position.lerpVectors(foco.de, foco.para, e);
+      controls.target.lerpVectors(foco.deAlvo, foco.paraAlvo, e);
+      controls.update();
+      if (foco.t >= 1) foco = null;
+    }
+    if (missao) {
+      passoMissao(dt);
+      if (!reduzido) Object.keys(LIG).forEach(function (k) { var l = LIG[k]; l.t = (l.t + dt / 2500) % 1; l.ponto.position.copy(l.c.getPoint(l.t)); });
+    }
+    renderer.render(cena, camera);
+    animando = !!(foco || missao);
+    if (animando) pedirRender();
+  }
+
+  redimensionar();
+  // Vista inicial: prédio inteiro na tela.
+  var alvoGeral = new THREE.Vector3(0, ANDARES.length * H / 2, 0);
+  controls.target.copy(alvoGeral);
+  camera.position.copy(alvoGeral).add(new THREE.Vector3(0.45, 0.2, 1).normalize()
+    .multiplyScalar(Math.min(controls.maxDistance, distanciaPara(W / 2 + 2.5, ANDARES.length * H / 2 + 1) + D)));
+  controls.update();
+  pedirRender();
+  window.__realcorp.pronto = true;
+})();
+</script>
+</body>
+</html>

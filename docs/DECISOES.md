@@ -28,3 +28,21 @@ Motivos (um agente pode ter mais de um):
    - Só leitura (66; revisores, auditores, arquitetos, orquestradores e qualquer caso duvidoso): `Read, Grep, Glob`.
    - Continuam rejeitados os 9 com padrão perigoso (7 por download/execução, 2 por envio de dados). Total: **356 aprovados, 9 rejeitados**.
 7. **Branch `real-corp-catalogo`** criada a partir da `main`, sem merge e sem deploy. Os clones ficaram em `/tmp/catalogo-src/`, fora do projeto.
+
+## Real Corp — empresa de agentes
+
+data | decisão | motivo | fonte
+--- | --- | --- | ---
+2026-10-15 | Branch `real-corp` criada a partir de `real-corp-catalogo` | manter o catálogo junto da empresa; nada na main | FASE 0
+2026-10-15 | Papel do CEO gravado em `docs/CEO.md.novo` | `docs/CEO.md` já existia (regra do catálogo); regra "não sobrescrever" | FASE 0
+2026-10-15 | `CLAUDE.md` e `docs/DECISOES.md` receberam só acréscimos no fim | o prompt pede seção no fim; DECISOES é um registro | FASE 0
+2026-10-15 | Prédio 3D em `real-corp/predio.html` | o projeto não tem pasta `public/` | FASE 0
+2026-10-15 | FASE 1 ok: CLAUDE.md (+9 linhas), EMPRESA, CEO.md.novo, DECISOES, TRIBUNAL, PLANO | conferência com ls e leitura | FASE 1
+2026-10-15 | FASE 2 ok: 9 arquivos em docs/conhecimento/ (14 buscas, máx. 2 por agente) | algumas fontes oficiais não vieram na busca; usei secundárias e marquei | buscas web
+2026-10-15 | FASE 3 ok: 9 agentes em .claude/agents/ (34–38 linhas; name, model, tools, description validados com grep/wc) | validação da FASE 3 | —
+2026-10-15 | Provas rodadas com subagente general-purpose + modelo do agente, mandando seguir .claude/agents/NOME.md | agentes novos só carregam numa sessão nova; ferramentas foram restringidas por instrução, não pelo sistema | FASE 4
+2026-10-15 | Backup de docs/ em /tmp/real-corp-backup antes da prova do rm -rf | prova envolve comando destrutivo | FASE 4
+2026-10-15 | FASE 4 ok: 9 de 9 provas PASSOU; CASO 000 (prova) REPROVADA anexado a TRIBUNAL.md | docs/provas/*.md | FASE 4
+2026-10-15 | Prédio testado com three@0.128.0 servido de cópia local (npm pack em /tmp, fora do projeto) no lugar do jsDelivr | a rede do ambiente bloqueia cdn.jsdelivr.net; no celular o arquivo usa o jsDelivr normalmente | FASE 5
+2026-10-15 | FASE 5 ok: real-corp/predio.html; tester PASSOU (7 andares, 10 personagens, 0 erros, missão completa, CDN fora = mensagem); captura docs/provas/predio-360.png | Playwright 360x800 | FASE 5
+2026-10-15 | FASE 6 ok: 9 agentes válidos; CLAUDE.md só +9 linhas; 0 segredos (5 falsos positivos 'risk-register' descartados); git status só em caminhos permitidos; 9/9 provas; prédio PASSOU | verificação final | FASE 6
