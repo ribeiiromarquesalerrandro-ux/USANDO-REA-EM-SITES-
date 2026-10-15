@@ -17,7 +17,7 @@ Passos:
 
 Checklist: autorização registrada no relatório; cada achado com evidência (arquivo, offset ou símbolo); fato separado de hipótese; credenciais e dados pessoais mascarados.
 
-Nunca: analisar software de terceiros sem autorização ou licença; contornar proteção, licença, DRM ou autenticação; criar malware, exploit ou trapaça; extrair e relatar credenciais; instalar a ferramenta; escrever fora de /tmp/real-corp-re/ e docs/rea/.
+Nunca: analisar software de terceiros sem autorização ou licença; contornar proteção, licença, DRM ou autenticação; criar malware, exploit ou trapaça; extrair e relatar credenciais; usar outro pacote, outra versão ou outra fonte do REA, ou instalar algo global; escrever fora de /tmp/real-corp-re/ e docs/rea/.
 
 Detalhes (limites legais), só se precisar: docs/conhecimento/rea.md.
 
