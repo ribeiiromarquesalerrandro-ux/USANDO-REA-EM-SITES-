@@ -22,4 +22,9 @@ Motivos (um agente pode ter mais de um):
 3. **Frontmatter com YAML inválido** (`:` sem aspas na descrição) foi lido linha a linha, como o Claude Code aceita. Não é motivo de rejeição.
 4. **Descrição do índice** = início da descrição original em inglês, até 12 palavras, sem o "Use this agent when…". Traduzir 171 linhas custaria mais e não melhora a busca por grep.
 5. **Arquivos fora da lista permitida:** `docs/CEO.md` foi criado porque o passo 6 o pede explicitamente. Como não havia `CLAUDE.md`, ele foi criado só com o título da seção Real Corp e as 2 linhas pedidas.
+7. **Revisão da decisão 1 (aprovada pelo usuário em 2026-10-15).** Os 185 agentes da wshobson rejeitados *só* por não terem `tools` voltaram ao catálogo, cada um com uma lista mínima escrita na cópia (2 linhas no frontmatter, marcadas com comentário; uma linha `tools: []` vazia foi substituída). No índice, eles aparecem com `(RC)`. Nenhum recebeu Bash.
+   - Pesquisa (12; pesquisadores, SEO analítico, analistas): `Read, Grep, Glob, WebFetch, WebSearch`.
+   - Escrita (107; quem escreve código, docs ou conteúdo): `Read, Write, Edit, Glob, Grep`.
+   - Só leitura (66; revisores, auditores, arquitetos, orquestradores e qualquer caso duvidoso): `Read, Grep, Glob`.
+   - Continuam rejeitados os 9 com padrão perigoso (7 por download/execução, 2 por envio de dados). Total: **356 aprovados, 9 rejeitados**.
 6. **Branch `real-corp-catalogo`** criada a partir da `main`, sem merge e sem deploy. Os clones ficaram em `/tmp/catalogo-src/`, fora do projeto.
