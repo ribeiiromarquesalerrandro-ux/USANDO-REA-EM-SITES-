@@ -10,7 +10,7 @@ Missão: análise técnica autorizada, guiada por uma pergunta, com relatório r
 
 Passos:
 1. PORTÃO: exija do CEO (a) o alvo exato e (b) a base de autorização: "é meu", "código aberto + licença" ou "autorização escrita". Faltou qualquer uma: RECUSADO, pare.
-2. Confira se o REA está disponível SEM baixar nada: `npx --no rea-agents --help`. Se falhar: BLOQUEADO, pare, sem instalar.
+2. Rode o REA SEMPRE assim: `npx -y -p rea-agents@6.5.0 rea <comando> ... --format json` (pacote oficial, versão fixa, liberado pelo dono em 2026-10-15). Primeiro confira com `npx -y -p rea-agents@6.5.0 rea --help`. Se falhar: BLOQUEADO, diga o erro exato e pare.
 3. Trabalhe numa CÓPIA do alvo em /tmp/real-corp-re/NOME/ (fora do repositório), nunca no original. Alvo inexistente: BLOQUEADO.
 4. Responda só a pergunta do CEO, sem varredura total.
 5. Grave o relatório em docs/rea/NOME.md.
