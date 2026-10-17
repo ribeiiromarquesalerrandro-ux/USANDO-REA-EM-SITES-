@@ -1,0 +1,785 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>Galeria Órbita</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Tokens de cor: tema claro por padrão, escuro pelo sistema ou por data-theme. */
+:root {
+  --fundo: #eef0f4;
+  --superficie: #ffffff;
+  --tinta: #141a2b;
+  --suave: #5b6478;
+  --linha: #d5d9e3;
+  --acento: #2f4bf0;
+  --acento2: #ff5d3a;
+  --sobre-acento: #ffffff;
+  --sobre-acento2: #141a2b;
+  --veu: rgba(20, 26, 43, 0.55);
+  --cena: #e3e7f1;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --fundo: #0b0f1a;
+    --superficie: #141a2b;
+    --tinta: #e9ecf5;
+    --suave: #9aa3b8;
+    --linha: #263049;
+    --acento: #8ea0ff;
+    --acento2: #ff8a6b;
+    --sobre-acento: #0b0f1a;
+    --sobre-acento2: #0b0f1a;
+    --veu: rgba(0, 0, 0, 0.65);
+    --cena: #0f1524;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --fundo: #0b0f1a;
+  --superficie: #141a2b;
+  --tinta: #e9ecf5;
+  --suave: #9aa3b8;
+  --linha: #263049;
+  --acento: #8ea0ff;
+  --acento2: #ff8a6b;
+  --sobre-acento: #0b0f1a;
+  --sobre-acento2: #0b0f1a;
+  --veu: rgba(0, 0, 0, 0.65);
+  --cena: #0f1524;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--tinta);
+  font-family: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+.externo {
+  padding-block: 24px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.miolo { max-width: 1120px; margin: 0 auto; min-width: 0; }
+
+:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px; }
+
+h1, h2 {
+  font-family: "Bricolage Grotesque", "Arial Black", system-ui, sans-serif;
+  margin: 0;
+  line-height: 1.05;
+}
+.mono { font-family: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; }
+
+/* Cabeçalho */
+.topo { display: grid; gap: 20px; align-items: center; margin-bottom: 24px; }
+.topo h1 { font-size: clamp(3rem, 14vw, 5.5rem); font-weight: 800; letter-spacing: -0.03em; }
+.topo p { margin: 8px 0 0; color: var(--suave); font-size: 1.05rem; }
+.cena-topo {
+  position: relative;
+  height: 200px;
+  border: 1px solid var(--linha);
+  border-radius: 16px;
+  background: var(--cena);
+  overflow: hidden;
+}
+.cena-topo canvas, .cena-painel canvas { display: block; width: 100%; height: 100%; }
+.aviso3d {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px; text-align: center;
+  color: var(--suave); font-size: 0.9rem;
+}
+.aviso3d[hidden] { display: none; }
+
+/* Filtros */
+.filtros { display: grid; gap: 14px; margin-bottom: 20px; }
+.busca-rotulo { display: block; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.8rem; color: var(--suave); margin-bottom: 6px; }
+#busca {
+  width: 100%; min-height: 48px;
+  padding: 0 14px;
+  font: inherit; color: var(--tinta);
+  background: var(--superficie);
+  border: 1px solid var(--linha);
+  border-radius: 12px;
+}
+#busca::placeholder { color: var(--suave); }
+.grupo { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.grupo-nome { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.78rem; color: var(--suave); width: 100%; }
+.chip {
+  min-height: 44px; min-width: 44px;
+  padding: 0 16px;
+  font: 500 0.92rem "IBM Plex Sans", system-ui, sans-serif;
+  color: var(--tinta);
+  background: var(--superficie);
+  border: 1px solid var(--linha);
+  border-radius: 999px;
+  cursor: pointer;
+}
+.chip[aria-pressed="true"] { background: var(--acento); border-color: var(--acento); color: var(--sobre-acento); }
+.contador { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.9rem; color: var(--suave); margin: 0; }
+
+/* Grade e cards */
+.grade { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr; gap: 16px; }
+.grade > li { min-width: 0; }
+.grade > li[hidden] { display: none; }
+.card {
+  display: block; width: 100%; min-height: 44px;
+  padding: 0; text-align: left;
+  font: inherit; color: var(--tinta);
+  background: var(--superficie);
+  border: 1px solid var(--linha);
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+.card:hover { border-color: var(--acento); transform: translateY(-2px); }
+.miniatura { position: relative; display: block; aspect-ratio: 16 / 10; background: var(--cena); }
+.miniatura canvas { display: block; width: 100%; height: 100%; }
+.selo {
+  display: inline-block;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.72rem; font-weight: 500;
+  padding: 2px 8px; border-radius: 6px;
+  background: var(--acento2); color: var(--sobre-acento2);
+}
+.miniatura .selo { position: absolute; top: 10px; left: 10px; }
+.card-corpo { display: block; padding: 14px 16px 16px; }
+.card-titulo { display: block; font-family: "Bricolage Grotesque", system-ui, sans-serif; font-weight: 700; font-size: 1.25rem; line-height: 1.15; }
+.card-autor { display: block; color: var(--suave); font-size: 0.9rem; margin-top: 2px; }
+.etiquetas { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.etiqueta {
+  font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.74rem;
+  color: var(--suave); border: 1px solid var(--linha); border-radius: 6px; padding: 1px 7px;
+}
+
+.vazio { text-align: center; padding: 40px 16px; border: 1px dashed var(--linha); border-radius: 16px; background: var(--superficie); }
+.vazio[hidden] { display: none; }
+.vazio h2 { font-size: 1.5rem; font-weight: 700; }
+.vazio p { color: var(--suave); margin: 8px 0 16px; }
+.botao {
+  min-height: 44px; min-width: 44px; padding: 0 20px;
+  font: 600 0.95rem "IBM Plex Sans", system-ui, sans-serif;
+  color: var(--sobre-acento); background: var(--acento);
+  border: 0; border-radius: 12px; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  text-decoration: none;
+}
+
+.rodape { margin-top: 36px; padding-top: 16px; border-top: 1px solid var(--linha); color: var(--suave); font-size: 0.88rem; }
+
+/* Painel de detalhe */
+.fundo-painel {
+  position: fixed; inset: 0; z-index: 10;
+  background: var(--veu);
+  display: flex; align-items: flex-end; justify-content: center;
+  padding-left: max(0px, env(safe-area-inset-left, 0px));
+  padding-right: max(0px, env(safe-area-inset-right, 0px));
+}
+.fundo-painel[hidden] { display: none; }
+.painel {
+  position: relative;
+  width: 100%; max-width: 640px; max-height: 94vh; overflow-y: auto;
+  background: var(--superficie); color: var(--tinta);
+  border: 1px solid var(--linha);
+  border-radius: 20px 20px 0 0;
+  padding: 16px;
+}
+.painel:focus { outline: none; }
+.painel:focus-visible { outline: 3px solid var(--acento); outline-offset: -3px; }
+#fechar {
+  position: absolute; top: 12px; right: 12px; z-index: 2;
+  width: 44px; height: 44px; padding: 0;
+  font-size: 1.1rem; color: var(--tinta);
+  background: var(--superficie); border: 1px solid var(--linha); border-radius: 50%;
+  cursor: pointer;
+}
+.cena-painel { position: relative; height: 280px; border-radius: 14px; background: var(--cena); overflow: hidden; touch-action: none; }
+.painel h2 { font-size: 1.8rem; font-weight: 700; margin-top: 16px; padding-right: 8px; }
+.painel .autor { color: var(--suave); margin: 4px 0 0; }
+.painel .desc { margin: 12px 0; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 16px; }
+.dica { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.75rem; color: var(--suave); margin: 8px 0 0; }
+.sem-link { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.9rem; color: var(--suave); }
+
+/* Celular: topo compacto para o primeiro card aparecer na primeira tela. */
+@media (max-width: 639.98px) {
+  .externo { padding-block: 12px 32px; }
+  .topo { grid-template-columns: minmax(0, 1fr) 42%; gap: 12px; margin-bottom: 12px; }
+  .topo h1 { font-size: 2.4rem; }
+  .topo p { margin-top: 4px; font-size: 0.9rem; line-height: 1.3; }
+  .cena-topo { height: 120px; }
+  .filtros { gap: 8px; margin-bottom: 14px; }
+  .busca-rotulo { margin-bottom: 2px; }
+  .grupo {
+    flex-wrap: nowrap; overflow-x: auto; overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity; scrollbar-width: thin;
+  }
+  .grupo-nome { width: auto; flex: none; white-space: nowrap; }
+  .chip { flex: none; white-space: nowrap; scroll-snap-align: start; }
+}
+@media (min-width: 640px) {
+  .grade { grid-template-columns: repeat(2, 1fr); }
+  .fundo-painel { align-items: center; padding: 24px; }
+  .painel { border-radius: 20px; }
+}
+@media (min-width: 800px) {
+  .topo { grid-template-columns: 1fr 1fr; }
+}
+@media (min-width: 1000px) {
+  .grade { grid-template-columns: repeat(3, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+  .card:hover { transform: none; }
+}
+</style>
+
+<div class="externo">
+  <div class="miolo">
+    <header class="topo">
+      <div>
+        <h1>Órbita</h1>
+        <p>Experiências 3D na web, escolhidas a dedo</p>
+      </div>
+      <div class="cena-topo" id="cenaTopo" role="img" aria-label="Três sólidos girando em volta de um anel">
+        <div class="aviso3d" id="avisoTopo" hidden></div>
+      </div>
+    </header>
+
+    <section class="filtros" aria-label="Filtros">
+      <div>
+        <label class="busca-rotulo" for="busca">Buscar projeto</label>
+        <input id="busca" type="search" placeholder="Nome, autor ou tecnologia" autocomplete="off">
+      </div>
+      <div class="grupo" id="chipsCategoria" role="group" aria-label="Categoria">
+        <span class="grupo-nome">Categoria</span>
+      </div>
+      <div class="grupo" id="chipsTec" role="group" aria-label="Tecnologia">
+        <span class="grupo-nome">Tecnologia (todas as marcadas)</span>
+      </div>
+      <p class="contador" id="contador" aria-live="polite"></p>
+    </section>
+
+    <ul class="grade" id="grade"></ul>
+
+    <div class="vazio" id="vazio" hidden>
+      <h2>Nada por aqui</h2>
+      <p>Nenhum projeto bate com esses filtros.</p>
+      <button type="button" class="botao" id="limpar">Limpar filtros</button>
+    </div>
+
+    <footer class="rodape">Galeria Órbita · feita pela Real Corp. Os projetos marcados como Exemplo são fictícios, para mostrar a galeria funcionando.</footer>
+  </div>
+</div>
+
+<div class="fundo-painel" id="fundoPainel" hidden>
+  <div class="painel" id="painel" role="dialog" aria-modal="true" aria-labelledby="painelTitulo" tabindex="-1">
+    <button type="button" id="fechar" aria-label="Fechar detalhes">✕</button>
+    <div class="cena-painel" id="cenaPainel">
+      <div class="aviso3d" id="avisoPainel" hidden></div>
+    </div>
+    <p class="dica">Arraste para girar · pinça para aproximar</p>
+    <h2 id="painelTitulo"></h2>
+    <p class="autor" id="painelAutor"></p>
+    <p class="desc" id="painelDesc"></p>
+    <div class="meta" id="painelMeta"></div>
+    <div id="painelAcao"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var CATEGORIAS = ['Todos', 'Portfólio', 'Produto', 'Arte', 'Jogo', 'Arquitetura', 'Ferramenta'];
+  var TECNOLOGIAS = ['Three.js', 'WebGL', 'WebGPU', 'R3F'];
+
+  var ITENS = [
+    { titulo: 'Prédio Real Corp', autor: 'Real Corp', cat: 'Ferramenta', tec: ['Three.js', 'WebGL'], cena: 'predio', c1: '#2f4bf0', c2: '#ff5d3a', exemplo: false,
+      link: 'https://claude.ai/artifact/JkEcc3gu5rJUwVb51tGZAy',
+      desc: 'Prédio 3D com os 10 agentes da Real Corp, tribunal com votos e a missão completa do fluxo.' },
+    { titulo: 'Maré de Partículas', autor: 'Marina Teixeira', cat: 'Arte', tec: ['WebGL'], cena: 'particulas', c1: '#14b8c4', c2: '#6d5df6', exemplo: true,
+      desc: 'Milhares de pontos de luz formam ondas que reagem ao toque do cursor.' },
+    { titulo: 'Tênis 360', autor: 'Caio Bezerra', cat: 'Produto', tec: ['Three.js', 'R3F'], cena: 'no', c1: '#ff7a45', c2: '#2f4bf0', exemplo: true,
+      desc: 'Visualizador de tênis para girar, ampliar e trocar de cor antes de comprar.' },
+    { titulo: 'Casa Pátio', autor: 'Helena Vasconcelos', cat: 'Arquitetura', tec: ['Three.js'], cena: 'cidade', c1: '#d9a441', c2: '#3b8f7a', exemplo: true,
+      desc: 'Passeio por uma casa com pátio central, com a luz do dia mudando ao longo das horas.' },
+    { titulo: 'Planeta de Bolso', autor: 'Davi Albuquerque', cat: 'Jogo', tec: ['Three.js'], cena: 'planeta', c1: '#7c4dff', c2: '#ffb347', exemplo: true,
+      desc: 'Jogo de explorar um mini planeta e coletar luas antes do pôr do sol.' },
+    { titulo: 'Cristais de Som', autor: 'Luana Prado', cat: 'Arte', tec: ['WebGPU'], cena: 'cristais', c1: '#e040a0', c2: '#35c6f4', exemplo: true,
+      desc: 'Cristais que pulsam e mudam de forma conforme a música tocada.' },
+    { titulo: 'Mapa da Cidade', autor: 'Rafael Menezes', cat: 'Ferramenta', tec: ['WebGL'], cena: 'cidade', c1: '#3b82f6', c2: '#22c28a', exemplo: true,
+      desc: 'Mapa 3D de bairros com camadas de transporte, parques e comércio.' },
+    { titulo: 'Portfólio de Vidro', autor: 'Beatriz Camargo', cat: 'Portfólio', tec: ['R3F'], cena: 'cristais', c1: '#5fc9e8', c2: '#9b8cff', exemplo: true,
+      desc: 'Portfólio de uma designer com peças de vidro que giram a cada projeto.' },
+    { titulo: 'Relógio Orbital', autor: 'Tiago Nogueira', cat: 'Arte', tec: ['Three.js'], cena: 'planeta', c1: '#f25f5c', c2: '#247ba0', exemplo: true,
+      desc: 'Relógio onde horas, minutos e segundos orbitam um pequeno planeta.' },
+    { titulo: 'Cadeira Luna', autor: 'Isadora Fontes', cat: 'Produto', tec: ['Three.js'], cena: 'no', c1: '#e8a87c', c2: '#7a6cf0', exemplo: true,
+      desc: 'Vitrine de uma cadeira de design com materiais e acabamentos para comparar.' },
+    { titulo: 'Labirinto Neon', autor: 'Gustavo Ferraz', cat: 'Jogo', tec: ['WebGL'], cena: 'cidade', c1: '#2ee6a6', c2: '#ff3d9a', exemplo: true,
+      desc: 'Labirinto de blocos brilhantes em que você foge de luzes que patrulham.' },
+    { titulo: 'Estúdio Low-poly', autor: 'Camila Rezende', cat: 'Portfólio', tec: ['Three.js'], cena: 'particulas', c1: '#f4b942', c2: '#4f6df5', exemplo: true,
+      desc: 'Site de um estúdio com nuvens de pontos e modelos low-poly para cada serviço.' }
+  ];
+  ITENS.forEach(function (it, i) { it.id = 'item-' + (i + 1); it.seed = i * 7919 + 13; });
+
+  var reduzir = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var estado = { q: '', cat: 'Todos', tecs: [] };
+  var gancho = window.__galeria = { pronto: false, itens: ITENS.map(function (i) { return i.titulo; }), visiveis: [], detalheAberto: null, erro3d: null };
+
+  function $(id) { return document.getElementById(id); }
+
+  // ---------- utilitários ----------
+  function rng(seed) {
+    var a = seed >>> 0;
+    return function () {
+      a = (a + 0x6D2B79F5) >>> 0;
+      var t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function rgb(h) { var n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+  function mistura(a, b, t) {
+    var x = rgb(a), y = rgb(b);
+    return 'rgb(' + x.map(function (v, i) { return Math.round(v + (y[i] - v) * t); }).join(',') + ')';
+  }
+  function normaliza(s) { return String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim(); }
+  function el(tag, cls, texto) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (texto != null) e.textContent = texto;
+    return e;
+  }
+
+  // ---------- miniaturas 2D (determinísticas, desenhadas uma vez) ----------
+  function miniatura(canvas, it) {
+    var W = 320, H = 200, r = rng(it.seed), i, j, x, y;
+    canvas.width = W; canvas.height = H;
+    var g = canvas.getContext('2d');
+    var bg = g.createLinearGradient(0, 0, W, H);
+    bg.addColorStop(0, mistura(it.c1, '#0b0f1a', 0.78));
+    bg.addColorStop(1, mistura(it.c2, '#0b0f1a', 0.82));
+    g.fillStyle = bg; g.fillRect(0, 0, W, H);
+
+    if (it.cena === 'predio') {
+      var n = 7, h = 19, base = H - 22;
+      for (i = 0; i < n; i++) {
+        var w = 150 - i * 12;
+        g.fillStyle = mistura(it.c1, it.c2, i / (n - 1));
+        g.fillRect((W - w) / 2, base - (i + 1) * h, w, h - 2);
+        g.fillStyle = 'rgba(255,255,255,0.55)';
+        for (j = 0; j < Math.floor(w / 22); j++) g.fillRect((W - w) / 2 + 8 + j * 22, base - (i + 1) * h + 6, 10, 6);
+      }
+      g.fillStyle = mistura(it.c2, '#0b0f1a', 0.5);
+      g.fillRect(40, base, W - 80, 4);
+    } else if (it.cena === 'particulas') {
+      var fase = r() * 6;
+      for (j = 0; j < 8; j++) {
+        for (x = 6; x < W; x += 9) {
+          y = H * 0.38 + j * 15 + Math.sin(x * 0.04 + j * 0.6 + fase) * 24;
+          g.fillStyle = mistura(it.c1, it.c2, (x / W + j / 8) / 2);
+          g.beginPath(); g.arc(x, y, 1.7, 0, 6.2832); g.fill();
+        }
+      }
+    } else if (it.cena === 'cidade') {
+      for (i = 0; i < 12; i++) {
+        var hh = 30 + r() * 105;
+        g.fillStyle = mistura(it.c1, it.c2, r());
+        g.fillRect(12 + i * 25, H - 20 - hh, 21, hh);
+        g.fillStyle = 'rgba(255,255,255,0.4)';
+        for (j = 0; j < hh - 12; j += 14) g.fillRect(17 + i * 25, H - 20 - hh + 6 + j, 4, 5);
+      }
+      g.fillStyle = mistura(it.c2, '#0b0f1a', 0.4);
+      g.fillRect(0, H - 20, W, 20);
+    } else if (it.cena === 'planeta') {
+      var cx = W / 2, cy = H / 2;
+      g.fillStyle = it.c1; g.beginPath(); g.arc(cx, cy, 52, 0, 6.2832); g.fill();
+      g.fillStyle = 'rgba(255,255,255,0.18)'; g.beginPath(); g.arc(cx - 16, cy - 16, 28, 0, 6.2832); g.fill();
+      g.strokeStyle = it.c2; g.lineWidth = 6;
+      g.beginPath(); g.ellipse(cx, cy, 108, 26, -0.4, 0.15 * Math.PI, 0.85 * Math.PI); g.stroke();
+      g.beginPath(); g.ellipse(cx, cy, 108, 26, -0.4, 1.15 * Math.PI, 1.85 * Math.PI); g.stroke();
+      g.fillStyle = it.c2; g.beginPath(); g.arc(cx + 100, cy - 56, 12, 0, 6.2832); g.fill();
+    } else if (it.cena === 'cristais') {
+      for (i = 0; i < 8; i++) {
+        var px = 30 + r() * (W - 60), py = 40 + r() * (H - 80), s = 22 + r() * 24, c = mistura(it.c1, it.c2, r());
+        g.fillStyle = c;
+        g.beginPath(); g.moveTo(px, py - s * 1.3); g.lineTo(px + s * 0.8, py); g.lineTo(px, py + s * 1.3); g.lineTo(px - s * 0.8, py); g.closePath(); g.fill();
+        g.fillStyle = 'rgba(255,255,255,0.28)';
+        g.beginPath(); g.moveTo(px, py - s * 1.3); g.lineTo(px + s * 0.8, py); g.lineTo(px, py); g.closePath(); g.fill();
+      }
+    } else {
+      g.lineWidth = 3;
+      for (i = 0; i < 8; i++) {
+        g.strokeStyle = mistura(it.c1, it.c2, i / 7);
+        g.beginPath(); g.ellipse(W / 2, H / 2, 96 - i * 5, 30 + i * 6, i * 0.42, 0, 6.2832); g.stroke();
+      }
+    }
+  }
+
+  // ---------- cenas 3D ----------
+  function tem3d() { return typeof THREE !== 'undefined' && typeof THREE.OrbitControls !== 'undefined'; }
+
+  function construirCena(tipo, c1, c2, seed) {
+    var r = rng(seed), grupo = new THREE.Group(), i, j, m, malha;
+    var a = new THREE.Color(c1), b = new THREE.Color(c2);
+    function cor(t) { return a.clone().lerp(b, t); }
+    function lambert(c, flat) { return new THREE.MeshLambertMaterial({ color: c, flatShading: !!flat }); }
+
+    if (tipo === 'predio') {
+      for (i = 0; i < 8; i++) {
+        var w = 3 - i * 0.22;
+        malha = new THREE.Mesh(new THREE.BoxGeometry(w, 0.62, w), lambert(cor(i / 7)));
+        malha.position.y = -2 + i * 0.66;
+        grupo.add(malha);
+      }
+      m = new THREE.Mesh(new THREE.ConeGeometry(0.25, 0.7, 4), lambert(b));
+      m.position.y = -2 + 8 * 0.66 + 0.1;
+      grupo.add(m);
+    } else if (tipo === 'particulas') {
+      var N = 48, pos = new Float32Array(N * N * 3), col = new Float32Array(N * N * 3), k = 0, cc;
+      for (i = 0; i < N; i++) {
+        for (j = 0; j < N; j++) {
+          var x = (i / (N - 1) - 0.5) * 6, z = (j / (N - 1) - 0.5) * 6;
+          pos[k * 3] = x; pos[k * 3 + 1] = Math.sin(x * 1.6) * 0.5 + Math.cos(z * 1.3) * 0.5; pos[k * 3 + 2] = z;
+          cc = cor(i / (N - 1));
+          col[k * 3] = cc.r; col[k * 3 + 1] = cc.g; col[k * 3 + 2] = cc.b;
+          k++;
+        }
+      }
+      var geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+      grupo.add(new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.06, vertexColors: true })));
+    } else if (tipo === 'cidade') {
+      for (i = -2; i <= 2; i++) {
+        for (j = -2; j <= 2; j++) {
+          var hh = 0.4 + r() * 2.4;
+          malha = new THREE.Mesh(new THREE.BoxGeometry(0.8, hh, 0.8), lambert(cor(r())));
+          malha.position.set(i * 1.1, hh / 2 - 1.2, j * 1.1);
+          grupo.add(malha);
+        }
+      }
+    } else if (tipo === 'planeta') {
+      grupo.add(new THREE.Mesh(new THREE.SphereGeometry(1.3, 20, 14), lambert(a, true)));
+      var anel = new THREE.Mesh(new THREE.TorusGeometry(2.2, 0.1, 6, 48), lambert(b));
+      anel.rotation.x = Math.PI / 2.4; anel.scale.z = 0.4;
+      grupo.add(anel);
+      var lua = new THREE.Mesh(new THREE.SphereGeometry(0.34, 12, 8), lambert(b, true));
+      lua.position.set(2.5, 1.1, 0.4);
+      grupo.add(lua);
+    } else if (tipo === 'cristais') {
+      for (i = 0; i < 9; i++) {
+        var g2 = i % 2 ? new THREE.OctahedronGeometry(0.5 + r() * 0.5) : new THREE.IcosahedronGeometry(0.4 + r() * 0.4);
+        malha = new THREE.Mesh(g2, lambert(cor(r()), true));
+        malha.position.set((r() - 0.5) * 4, (r() - 0.5) * 3, (r() - 0.5) * 4);
+        malha.rotation.set(r() * 3, r() * 3, 0);
+        grupo.add(malha);
+      }
+    } else {
+      grupo.add(new THREE.Mesh(new THREE.TorusKnotGeometry(1.3, 0.42, 110, 14), lambert(cor(0.3), true)));
+    }
+    return grupo;
+  }
+
+  function luzes(cena) {
+    cena.add(new THREE.AmbientLight(0xffffff, 0.65));
+    var d = new THREE.DirectionalLight(0xffffff, 0.85);
+    d.position.set(3, 5, 4);
+    cena.add(d);
+  }
+
+  function liberar(obj) {
+    obj.traverse(function (o) {
+      if (o.geometry) o.geometry.dispose();
+      if (o.material) o.material.dispose();
+    });
+  }
+
+  function novoRenderer(host) {
+    var rend = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    rend.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    host.insertBefore(rend.domElement, host.firstChild);
+    return rend;
+  }
+
+  function aviso(elAviso, msg) { elAviso.textContent = msg; elAviso.hidden = false; }
+
+  // ---------- cena do cabeçalho ----------
+  var topo = { ok: false };
+  function iniciarTopo() {
+    var host = $('cenaTopo'), av = $('avisoTopo');
+    if (!tem3d()) {
+      gancho.erro3d = 'Biblioteca 3D não carregou';
+      aviso(av, 'Não foi possível carregar o 3D (verifique a conexão). O resto da galeria funciona normalmente.');
+      return;
+    }
+    var rend;
+    try { rend = novoRenderer(host); } catch (e) {
+      gancho.erro3d = 'WebGL indisponível';
+      aviso(av, 'Seu navegador não conseguiu iniciar o 3D. O resto da galeria funciona normalmente.');
+      return;
+    }
+    var acento = getComputedStyle(document.documentElement).getPropertyValue('--acento').trim() || '#2f4bf0';
+    var cena = new THREE.Scene(), cam = new THREE.PerspectiveCamera(40, 1, 0.1, 50);
+    cam.position.set(0, 2.6, 6.2); cam.lookAt(0, 0, 0);
+    luzes(cena);
+    var mats = [0, 1, 2].map(function (i) { return new THREE.MeshLambertMaterial({ color: new THREE.Color(acento).offsetHSL(i * 0.05, 0, i * 0.06 - 0.04), flatShading: true }); });
+    var anel = new THREE.Mesh(new THREE.TorusGeometry(2.1, 0.04, 6, 80), new THREE.MeshBasicMaterial({ color: new THREE.Color(acento) }));
+    anel.rotation.x = Math.PI / 2;
+    cena.add(anel);
+    var geos = [new THREE.TetrahedronGeometry(0.55), new THREE.OctahedronGeometry(0.5), new THREE.IcosahedronGeometry(0.48)];
+    var pivo = new THREE.Group(), solidos = geos.map(function (g, i) {
+      var s = new THREE.Mesh(g, mats[i]), ang = i * Math.PI * 2 / 3;
+      s.position.set(Math.cos(ang) * 2.1, 0, Math.sin(ang) * 2.1);
+      pivo.add(s);
+      return s;
+    });
+    cena.add(pivo);
+
+    function ajustar() {
+      var w = host.clientWidth, h = host.clientHeight;
+      if (!w || !h) return;
+      rend.setSize(w, h);
+      cam.aspect = w / h; cam.updateProjectionMatrix();
+      rend.render(cena, cam);
+    }
+    var visivel = false, raf = null;
+    function laco() {
+      raf = null;
+      if (!visivel || document.hidden || reduzir.matches) return;
+      pivo.rotation.y += 0.008;
+      solidos.forEach(function (s) { s.rotation.x += 0.012; s.rotation.y += 0.016; });
+      rend.render(cena, cam);
+      raf = requestAnimationFrame(laco);
+    }
+    function talvez() { if (!raf && visivel && !document.hidden && !reduzir.matches) raf = requestAnimationFrame(laco); }
+
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (es) { visivel = es[0].isIntersecting; talvez(); }).observe(host);
+    } else { visivel = true; }
+    document.addEventListener('visibilitychange', talvez);
+    if (reduzir.addEventListener) reduzir.addEventListener('change', function () { ajustar(); talvez(); });
+    window.addEventListener('resize', ajustar);
+    ajustar(); talvez();
+    topo.ok = true;
+  }
+
+  // ---------- painel de detalhe ----------
+  var painel = { rend: null, cam: null, cena: null, ctrl: null, grupo: null, raf: null, aberto: false, falhou: false, ultimoFoco: null };
+
+  function renderPainel() { if (painel.rend && painel.grupo) painel.rend.render(painel.cena, painel.cam); }
+  function ajustarPainel() {
+    if (!painel.rend) return;
+    var host = $('cenaPainel'), w = host.clientWidth, h = host.clientHeight;
+    if (!w || !h) return;
+    painel.rend.setSize(w, h);
+    painel.cam.aspect = w / h; painel.cam.updateProjectionMatrix();
+    renderPainel();
+  }
+  function lacoPainel() {
+    painel.raf = null;
+    if (!painel.aberto || document.hidden || !painel.ctrl.autoRotate) return;
+    painel.ctrl.update();
+    renderPainel();
+    painel.raf = requestAnimationFrame(lacoPainel);
+  }
+  function retomarPainel() { if (painel.aberto && !painel.raf && !document.hidden && painel.ctrl && painel.ctrl.autoRotate) painel.raf = requestAnimationFrame(lacoPainel); }
+
+  function prepararPainel3d(it) {
+    var host = $('cenaPainel'), av = $('avisoPainel');
+    av.hidden = true;
+    if (painel.falhou) { aviso(av, 'O 3D não está disponível neste navegador.'); return; }
+    if (!tem3d()) {
+      gancho.erro3d = gancho.erro3d || 'Biblioteca 3D não carregou';
+      aviso(av, 'Não foi possível carregar o 3D (verifique a conexão). Você ainda pode ver os detalhes abaixo.');
+      return;
+    }
+    if (!painel.rend) {
+      try { painel.rend = novoRenderer(host); } catch (e) {
+        painel.falhou = true; gancho.erro3d = 'WebGL indisponível';
+        aviso(av, 'Seu navegador não conseguiu iniciar o 3D.');
+        return;
+      }
+      painel.cena = new THREE.Scene();
+      painel.cam = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+      luzes(painel.cena);
+      var c = painel.ctrl = new THREE.OrbitControls(painel.cam, painel.rend.domElement);
+      c.enablePan = false; c.enableDamping = false;
+      c.minDistance = 4; c.maxDistance = 14; c.autoRotateSpeed = 1.2;
+      c.addEventListener('change', renderPainel);
+      window.addEventListener('resize', ajustarPainel);
+    }
+    if (painel.grupo) { painel.cena.remove(painel.grupo); liberar(painel.grupo); }
+    painel.grupo = construirCena(it.cena, it.c1, it.c2, it.seed);
+    painel.cena.add(painel.grupo);
+    painel.cam.position.set(4.5, 3, 7);
+    painel.ctrl.target.set(0, 0, 0);
+    painel.ctrl.autoRotate = !reduzir.matches;
+    painel.ctrl.update();
+    ajustarPainel();
+    retomarPainel();
+  }
+
+  function abrirDetalhe(it, origem) {
+    painel.ultimoFoco = origem;
+    $('painelTitulo').textContent = it.titulo;
+    $('painelAutor').textContent = 'por ' + it.autor;
+    $('painelDesc').textContent = it.desc;
+    var meta = $('painelMeta');
+    meta.textContent = '';
+    if (it.exemplo) meta.appendChild(el('span', 'selo', 'Exemplo'));
+    meta.appendChild(el('span', 'etiqueta', it.cat));
+    it.tec.forEach(function (t) { meta.appendChild(el('span', 'etiqueta', t)); });
+    var acao = $('painelAcao');
+    acao.textContent = '';
+    if (!it.exemplo && it.link) {
+      var a = el('a', 'botao', 'Abrir projeto');
+      a.href = it.link; a.target = '_blank'; a.rel = 'noopener'; a.id = 'abrirProjeto';
+      acao.appendChild(a);
+    } else {
+      acao.appendChild(el('span', 'sem-link', 'Exemplo: sem link'));
+    }
+    $('fundoPainel').hidden = false;
+    document.body.style.overflow = 'hidden';
+    painel.aberto = true;
+    gancho.detalheAberto = it.titulo;
+    $('painel').scrollTop = 0;
+    $('painel').focus();
+    prepararPainel3d(it);
+  }
+
+  function fecharDetalhe() {
+    if (!painel.aberto) return;
+    painel.aberto = false;
+    if (painel.raf) { cancelAnimationFrame(painel.raf); painel.raf = null; }
+    $('fundoPainel').hidden = true;
+    document.body.style.overflow = '';
+    gancho.detalheAberto = null;
+    if (painel.ultimoFoco && painel.ultimoFoco.focus) painel.ultimoFoco.focus();
+  }
+
+  // ---------- filtros e grade ----------
+  var cartas = {};
+  function montarGrade() {
+    var ul = $('grade');
+    ITENS.forEach(function (it) {
+      var li = el('li'), b = el('button', 'card');
+      b.type = 'button'; b.id = 'card-' + it.id;
+      b.setAttribute('aria-label', 'Abrir detalhes de ' + it.titulo);
+      var mini = el('span', 'miniatura'), cv = document.createElement('canvas');
+      cv.setAttribute('aria-hidden', 'true');
+      miniatura(cv, it);
+      mini.appendChild(cv);
+      if (it.exemplo) mini.appendChild(el('span', 'selo', 'Exemplo'));
+      var corpo = el('span', 'card-corpo');
+      corpo.appendChild(el('span', 'card-titulo', it.titulo));
+      corpo.appendChild(el('span', 'card-autor', it.autor));
+      var et = el('span', 'etiquetas');
+      [it.cat].concat(it.tec).forEach(function (t) { et.appendChild(el('span', 'etiqueta', t)); });
+      corpo.appendChild(et);
+      b.appendChild(mini); b.appendChild(corpo);
+      b.addEventListener('click', function () { abrirDetalhe(it, b); });
+      li.appendChild(b); ul.appendChild(li);
+      cartas[it.id] = li;
+    });
+  }
+
+  function bate(it) {
+    if (estado.cat !== 'Todos' && it.cat !== estado.cat) return false;
+    for (var i = 0; i < estado.tecs.length; i++) if (it.tec.indexOf(estado.tecs[i]) < 0) return false;
+    if (estado.q) {
+      var alvo = normaliza([it.titulo, it.autor, it.cat, it.desc].concat(it.tec).join(' '));
+      if (alvo.indexOf(estado.q) < 0) return false;
+    }
+    return true;
+  }
+
+  function aplicar() {
+    var vis = [];
+    ITENS.forEach(function (it) {
+      var ok = bate(it);
+      cartas[it.id].hidden = !ok;
+      if (ok) vis.push(it.titulo);
+    });
+    gancho.visiveis = vis;
+    $('contador').textContent = vis.length + (vis.length === 1 ? ' projeto' : ' projetos');
+    $('vazio').hidden = vis.length > 0;
+    $('grade').hidden = vis.length === 0;
+    document.querySelectorAll('#chipsCategoria .chip').forEach(function (c) { c.setAttribute('aria-pressed', String(c.dataset.valor === estado.cat)); });
+    document.querySelectorAll('#chipsTec .chip').forEach(function (c) { c.setAttribute('aria-pressed', String(estado.tecs.indexOf(c.dataset.valor) >= 0)); });
+  }
+
+  function montarChips() {
+    CATEGORIAS.forEach(function (c) {
+      var b = el('button', 'chip', c);
+      b.type = 'button'; b.dataset.valor = c; b.id = 'cat-' + normaliza(c);
+      b.addEventListener('click', function () { estado.cat = c; aplicar(); });
+      $('chipsCategoria').appendChild(b);
+    });
+    TECNOLOGIAS.forEach(function (t) {
+      var b = el('button', 'chip', t);
+      b.type = 'button'; b.dataset.valor = t; b.id = 'tec-' + normaliza(t).replace(/[^a-z0-9]/g, '');
+      b.addEventListener('click', function () {
+        var p = estado.tecs.indexOf(t);
+        if (p >= 0) estado.tecs.splice(p, 1); else estado.tecs.push(t);
+        aplicar();
+      });
+      $('chipsTec').appendChild(b);
+    });
+  }
+
+  function limpar() {
+    estado.q = ''; estado.cat = 'Todos'; estado.tecs = [];
+    $('busca').value = '';
+    aplicar();
+  }
+
+  // ---------- eventos globais ----------
+  $('busca').addEventListener('input', function (e) { estado.q = normaliza(e.target.value); aplicar(); });
+  $('limpar').addEventListener('click', limpar);
+  $('fechar').addEventListener('click', fecharDetalhe);
+  $('fundoPainel').addEventListener('click', function (e) { if (e.target === $('fundoPainel')) fecharDetalhe(); });
+  document.addEventListener('keydown', function (e) {
+    if (!painel.aberto) return;
+    if (e.key === 'Escape') { e.preventDefault(); fecharDetalhe(); return; }
+    if (e.key !== 'Tab') return;
+    var f = Array.prototype.slice.call($('painel').querySelectorAll('button, a[href]')).filter(function (n) { return n.offsetParent !== null; });
+    if (!f.length) return;
+    var primeiro = f[0], ultimo = f[f.length - 1];
+    if (e.shiftKey && (document.activeElement === primeiro || document.activeElement === $('painel'))) { e.preventDefault(); ultimo.focus(); }
+    else if (!e.shiftKey && document.activeElement === ultimo) { e.preventDefault(); primeiro.focus(); }
+  });
+  document.addEventListener('visibilitychange', retomarPainel);
+  if (reduzir.addEventListener) reduzir.addEventListener('change', function () {
+    if (painel.ctrl) { painel.ctrl.autoRotate = painel.aberto && !reduzir.matches; retomarPainel(); }
+  });
+
+  // ---------- início ----------
+  montarChips();
+  montarGrade();
+  aplicar();
+  iniciarTopo();
+  gancho.pronto = true;
+})();
+</script>
+</body>
+</html>
