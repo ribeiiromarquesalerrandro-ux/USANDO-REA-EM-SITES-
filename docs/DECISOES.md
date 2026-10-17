@@ -50,3 +50,5 @@ data | decisão | motivo | fonte
 2026-10-15 | Agente rea: linha 'Nunca' trocada (sai 'instalar a ferramenta', entra 'usar outro pacote, versão ou fonte do REA, ou instalar algo global'); prova real: rea analisou real-corp/predio.html → docs/rea/predio.md; tester PASSOU | confirmação do dono ('pode trocar') | conversa
 2026-10-17 | Galeria Órbita criada do zero (ideia de vitrine 3D; nada copiado do mesh3d.gallery, que não é do dono); 11 itens marcados como Exemplo; tester PASSOU | dono pediu um site parecido com mudanças; copiar o site de terceiros foi recusado | conversa
 2026-10-17 | CASO 001 (Órbita completa com Vercel + Supabase) REPROVADO pelo tribunal; proposta alternativa: fase 1 estática | veredito em docs/TRIBUNAL.md | tribunal
+2026-10-17 | Dono autorizou pausar jarvis-real e jarvis-stark no Supabase | pedido do dono; nada pausado porque a criação do projeto novo foi negada pelo controle de permissões | conversa
+2026-10-17 | CASO 002 (fase 1 estática "Vértice") APROVADA COM CONDIÇÕES | 3 votos BOA, sem BLOQUEIO | tribunal

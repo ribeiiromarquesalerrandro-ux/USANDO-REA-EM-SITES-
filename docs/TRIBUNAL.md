@@ -48,3 +48,13 @@ condições: 1. Nova proposta limitada à fase 1 estática: Next.js com dados em
 5. Rollback testado ("promover deploy anterior" na Vercel) e envios ou experimentos de terceiros só em iframe com sandbox em domínio separado.
 por quê: A maioria (2 de 3) votou MÁ, e o BLOQUEIO do jurado impede aprovação simples. O escopo completo junta dados pessoais, custo incerto e risco aos projetos existentes, sem mitigação já verificável. A fase 1 estática, que o defensor e o promotor propõem, remove esses riscos e pode voltar como novo caso.
 ```
+
+### CASO 002
+```
+CASO 002 | 2026-10-17 | Fase 1 estática do site "Vértice" (Next.js App Router, Vercel Hobby)
+votos: promotor BOA, defensor BOA, jurado BOA
+custo e segurança (do jurado): custo baixo (~US$2–3 construção; recorrente US$0 se couber no Hobby, não verificado); segurança: atenção, sem BLOQUEIO (reversível, sem segredo nem dado pessoal)
+VEREDITO: APROVADA COM CONDIÇÕES
+condições: 1. real-corp/vertice/package.json tem só next, react, react-dom e three com versões fixas, sem @supabase; package-lock.json existe e `npm audit` sem vulnerabilidade alta/crítica. 2. `grep -rEi "cdn|googleapis|gstatic|<iframe" real-corp/vertice/{app,components,public}` não retorna nada; fontes via next/font (locais); next.config com output: 'export', sem API routes nem server actions. 3. Sem formulário, cookie, analytics nem Vercel Analytics (grep no código); nenhum token ou .env no git (`git ls-files | grep -i env` vazio). 4. Autores/projetos de exemplo marcados como fictícios e sem texto "escolhidas a dedo"; página de criadores só com essa sinalização. 5. `npm run build` sem erro; tester dá PASSOU, incluindo 3D com three do npm e fallback sem WebGL. 6. Deploy de preview primeiro; rollback testado (promover deploy anterior) com URL respondendo 200 depois; 2FA ativo na Vercel (confirmado pelo usuário); uso não comercial (Hobby).
+por quê: 3 votos BOA e sem BLOQUEIO, então aprova. É reversível (rollback e git), mas o rollback tem de ser testado. Os riscos do promotor (portar o 3D, conteúdo fictício, Google Fonts) viram condições verificáveis. O custo recorrente US$0 não foi verificado, então qualquer mudança de plano ou Analytics exige novo tribunal.
+```
