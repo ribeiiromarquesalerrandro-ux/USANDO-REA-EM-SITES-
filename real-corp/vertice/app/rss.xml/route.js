@@ -3,7 +3,7 @@ import projetos from '@/data/projetos.json';
 
 export const dynamic = 'force-static';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://vertice.vercel.app';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://vertice-ebon.vercel.app';
 
 const esc = (s) =>
   String(s)

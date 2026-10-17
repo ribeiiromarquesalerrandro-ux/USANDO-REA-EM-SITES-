@@ -295,7 +295,11 @@ a {
   gap: 8px;
   overflow-x: auto;
   padding-bottom: 8px;
+  padding-right: 32px; /* o último chip não fica colado na borda */
   margin-bottom: 8px;
+  /* degradê na borda direita indica que o trilho rola */
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
 }
 .chip {
   flex: none;

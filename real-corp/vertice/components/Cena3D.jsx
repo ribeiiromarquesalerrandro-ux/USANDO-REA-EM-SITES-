@@ -151,6 +151,10 @@ export default function Cena3D({ tipo, cores = [], interativa = false, altura = 
         const grupo = construirCena(THREE, tipoOk, resolverCor(c1, '--acento'), resolverCor(c2, '--acento2'), seed);
         cena.add(grupo);
 
+        const esfera = new THREE.Box3().setFromObject(grupo).getBoundingSphere(new THREE.Sphere());
+        const raio = esfera.radius + esfera.center.length();
+        const direcao = cam.position.clone().normalize();
+
         const desenhar = () => rend.render(cena, cam);
 
         let controls = null;
@@ -189,6 +193,12 @@ export default function Cena3D({ tipo, cores = [], interativa = false, altura = 
           if (!w || !h) return;
           rend.setSize(w, h, false);
           cam.aspect = w / h;
+          // Recua a câmera até a esfera do objeto caber na altura e na largura.
+          const vf = (cam.fov * Math.PI) / 360;
+          const hf = Math.atan(Math.tan(vf) * cam.aspect);
+          const dist = (raio * 1.05) / Math.sin(Math.min(vf, hf));
+          cam.position.copy(direcao).multiplyScalar(dist);
+          if (controls) controls.maxDistance = Math.max(12, dist * 1.5);
           cam.updateProjectionMatrix();
           desenhar();
         };
