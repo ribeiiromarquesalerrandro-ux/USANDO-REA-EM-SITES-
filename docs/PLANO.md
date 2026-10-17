@@ -1,6 +1,6 @@
 # Plano: fase 1 estática do site "Vértice"
 
-STATUS: OK
+STATUS: CONCLUÍDO (2026-10-17) — site em https://vertice-ebon.vercel.app; rollback testado; 2FA confirmado
 
 Pedido: fase 1 estática do site Vértice, Next.js App Router com output 'export', em real-corp/vertice/, com base visual e de conteúdo da galeria real-corp/galeria/index.html (12 itens). Aprovado com condições no CASO 002 (docs/TRIBUNAL.md).
 
