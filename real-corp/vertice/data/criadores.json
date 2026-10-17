@@ -1,0 +1,14 @@
+[
+  { "slug": "real-corp", "nome": "Real Corp", "cidade": "Goiânia", "bio": "Empresa de agentes que constrói e publica experiências 3D para a web.", "exemplo": false },
+  { "slug": "estudio-poliedro", "nome": "Estúdio Poliedro", "cidade": "São Paulo", "bio": "Estúdio fictício de arte generativa com pontos de luz.", "exemplo": true },
+  { "slug": "coletivo-malha", "nome": "Coletivo Malha", "cidade": "Recife", "bio": "Coletivo fictício focado em visualização de produtos.", "exemplo": true },
+  { "slug": "atelie-patio", "nome": "Ateliê Pátio", "cidade": "Belo Horizonte", "bio": "Ateliê fictício de visualização arquitetônica interativa.", "exemplo": true },
+  { "slug": "oficina-lua-cheia", "nome": "Oficina Lua Cheia", "cidade": "Curitiba", "bio": "Oficina fictícia de jogos leves para navegador.", "exemplo": true },
+  { "slug": "casa-prisma", "nome": "Casa Prisma", "cidade": "Rio de Janeiro", "bio": "Casa fictícia que une som e geometria em tempo real.", "exemplo": true },
+  { "slug": "laboratorio-mapa", "nome": "Laboratório Mapa", "cidade": "Porto Alegre", "bio": "Laboratório fictício de mapas e dados urbanos em 3D.", "exemplo": true },
+  { "slug": "estudio-vidro", "nome": "Estúdio Vidro", "cidade": "Florianópolis", "bio": "Estúdio fictício de portfólios com materiais translúcidos.", "exemplo": true },
+  { "slug": "fabrica-orbita", "nome": "Fábrica Prisma", "cidade": "Salvador", "bio": "Fábrica fictícia de objetos animados que giram em órbita.", "exemplo": true },
+  { "slug": "ponto-fixo", "nome": "Ponto Fixo Design", "cidade": "Fortaleza", "bio": "Estúdio fictício de vitrines 3D para móveis e design.", "exemplo": true },
+  { "slug": "turma-neon", "nome": "Turma Neon", "cidade": "Brasília", "bio": "Turma fictícia que faz jogos de luz e labirintos.", "exemplo": true },
+  { "slug": "nuvem-lowpoly", "nome": "Nuvem Low-poly", "cidade": "Campinas", "bio": "Estúdio fictício de sites com modelos low-poly.", "exemplo": true }
+]

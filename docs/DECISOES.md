@@ -52,3 +52,4 @@ data | decisão | motivo | fonte
 2026-10-17 | CASO 001 (Órbita completa com Vercel + Supabase) REPROVADO pelo tribunal; proposta alternativa: fase 1 estática | veredito em docs/TRIBUNAL.md | tribunal
 2026-10-17 | Dono autorizou pausar jarvis-real e jarvis-stark no Supabase | pedido do dono; nada pausado porque a criação do projeto novo foi negada pelo controle de permissões | conversa
 2026-10-17 | CASO 002 (fase 1 estática "Vértice") APROVADA COM CONDIÇÕES | 3 votos BOA, sem BLOQUEIO | tribunal
+2026-10-17 | Vértice fase 1: build com --webpack (Turbopack falha com next/font/google); estúdio fictício 'Fábrica Órbita' renomeado para 'Fábrica Prisma'; tester PASSOU (9 rotas, busca, 3D, aviso sem WebGL, 0 requisições externas) | passos 1–9 do plano | CASO 002

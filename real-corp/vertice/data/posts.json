@@ -1,0 +1,38 @@
+[
+  {
+    "slug": "3d-leve-no-celular",
+    "titulo": "3D leve no celular",
+    "data": "2026-10-14",
+    "resumo": "Como manter cenas 3D fluidas em telas pequenas e aparelhos simples.",
+    "corpo": [
+      "A maior parte das visitas ao Vértice vem do celular, então cada cena nasce pensando em um aparelho simples, com pouca memória e bateria limitada.",
+      "O primeiro cuidado é limitar a densidade de pixels. Renderizar em resolução cheia de telas muito densas custa caro e quase não muda o que o olho percebe, então fixamos um teto para a escala de pixels.",
+      "O segundo é reduzir o que a cena desenha: menos polígonos, poucas luzes e materiais simples. Uma geometria enxuta com boas cores costuma ficar melhor do que um modelo pesado que trava.",
+      "Por fim, medimos em um aparelho de entrada, não só no computador de quem desenvolve. Se a cena roda bem ali, roda bem em quase todo lugar."
+    ]
+  },
+  {
+    "slug": "render-sob-demanda",
+    "titulo": "Render sob demanda: só desenhe quando algo muda",
+    "data": "2026-10-10",
+    "resumo": "Por que parar o laço de animação quando a cena está fora da tela ou parada.",
+    "corpo": [
+      "Um laço de animação que desenha sessenta quadros por segundo o tempo todo consome bateria mesmo quando nada se mexe.",
+      "No Vértice, cada cena só desenha quando está visível. Usamos um observador de visibilidade para pausar o laço assim que o cartão sai da tela e retomar quando ele volta.",
+      "Quando a cena é estática, vale ir além: desenhar um quadro apenas quando o usuário interage ou a janela muda de tamanho. O resultado é uma página mais fria e mais rápida.",
+      "Também pausamos tudo quando a aba fica em segundo plano. Parece detalhe, mas somado em vários cartões faz muita diferença."
+    ]
+  },
+  {
+    "slug": "acessibilidade-e-reduced-motion",
+    "titulo": "Acessibilidade em 3D e a preferência por menos movimento",
+    "data": "2026-10-06",
+    "resumo": "Como respeitar quem pede menos animação e manter o conteúdo compreensível.",
+    "corpo": [
+      "Movimento constante pode causar desconforto em algumas pessoas. Os sistemas operacionais oferecem a preferência de reduzir movimento, e um site deve respeitá-la.",
+      "No Vértice, quando essa preferência está ativa, as cenas aparecem paradas em uma pose agradável e a rotação automática é desligada. A pessoa ainda pode girar a cena por vontade própria.",
+      "Todo o conteúdo importante também existe em texto: títulos, descrições e rótulos descrevem o que a cena mostra, de modo que leitores de tela não dependam do canvas.",
+      "Por fim, garantimos foco visível e contraste suficiente nos controles. Um 3D bonito só vale se todo mundo conseguir usá-lo."
+    ]
+  }
+]
