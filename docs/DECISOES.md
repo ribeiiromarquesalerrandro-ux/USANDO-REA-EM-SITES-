@@ -58,3 +58,4 @@ data | decisão | motivo | fonte
 2026-10-17 | 502 isolado no console (1 de 2 rodadas) não se repetiu em 9 carregamentos nem em 2 novas rodadas | tratado como falha passageira da rede do ambiente | teste
 2026-10-17 | Teste de rollback do Vértice: rollback para dpl_3hjL6PnK2R8RY3YmrqAL1iFZpzer (versão antiga no ar, 200) e promoção de volta para dpl_8ofPwZWzFUQERd6ZoBgrdC5htbaK (versão atual no ar, 200); tester PASSOU | condição 6 do CASO 002, autorizado pelo dono | Vercel
 2026-10-17 | 2FA ativo na conta Vercel (confirmado pelo dono). Fase 1 do Vértice concluída: as 6 condições do CASO 002 atendidas (a 1ª publicação saiu direto em produção; as seguintes passaram por prévia) | condição 6 do CASO 002 | conversa
+2026-10-17 | CASO 003 (fase 2 com Supabase) APROVADA COM CONDIÇÕES; pausa do jarvis-stark aguarda o OK do dono após o inventário | veredito em docs/TRIBUNAL.md | tribunal

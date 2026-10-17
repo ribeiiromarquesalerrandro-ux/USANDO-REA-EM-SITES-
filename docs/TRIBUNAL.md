@@ -58,3 +58,19 @@ VEREDITO: APROVADA COM CONDIÇÕES
 condições: 1. real-corp/vertice/package.json tem só next, react, react-dom e three com versões fixas, sem @supabase; package-lock.json existe e `npm audit` sem vulnerabilidade alta/crítica. 2. `grep -rEi "cdn|googleapis|gstatic|<iframe" real-corp/vertice/{app,components,public}` não retorna nada; fontes via next/font (locais); next.config com output: 'export', sem API routes nem server actions. 3. Sem formulário, cookie, analytics nem Vercel Analytics (grep no código); nenhum token ou .env no git (`git ls-files | grep -i env` vazio). 4. Autores/projetos de exemplo marcados como fictícios e sem texto "escolhidas a dedo"; página de criadores só com essa sinalização. 5. `npm run build` sem erro; tester dá PASSOU, incluindo 3D com three do npm e fallback sem WebGL. 6. Deploy de preview primeiro; rollback testado (promover deploy anterior) com URL respondendo 200 depois; 2FA ativo na Vercel (confirmado pelo usuário); uso não comercial (Hobby).
 por quê: 3 votos BOA e sem BLOQUEIO, então aprova. É reversível (rollback e git), mas o rollback tem de ser testado. Os riscos do promotor (portar o 3D, conteúdo fictício, Google Fonts) viram condições verificáveis. O custo recorrente US$0 não foi verificado, então qualquer mudança de plano ou Analytics exige novo tribunal.
 ```
+
+### CASO 003
+```
+CASO 003 | 2026-10-17 | Fase 2 do Vértice: Supabase (projeto "vertice", sa-east-1, grátis) e pausa do jarvis-stark
+votos: promotor MÁ, defensor BOA, jurado BOA
+custo e segurança (do jurado): custo baixo (~US$3–5 de construção, US$0/mês no grátis, não verificado; Pro ~US$25/mês só se precisar de backup diário). Segurança: atenção, sem BLOQUEIO. SMTP próprio seria dependência nova e exige novo tribunal.
+VEREDITO: APROVADA COM CONDIÇÕES
+condições: 1. Antes de pausar o jarvis-stark, o dono lista os sites que dependem dele. O CEO confere com `grep -r "jarvis-stark"` no repositório e na Vercel (prj_8G7fvSR1VrgILyv8dXuvsTfap4q3). O resultado e o OK do dono ficam registrados em docs/TRIBUNAL.md. Se algum site depender dele, não pausar.
+2. Antes do 1º e-mail coletado, um pg_dump do vertice é restaurado em banco local e as contagens de linhas das 4 tabelas ficam iguais. As migrations ficam no git.
+3. As 4 tabelas têm RLS com WITH CHECK. O tester prova com a chave anon que não lê nem altera dados alheios, não escreve em admins nem no status dos envios e não vira admin.
+4. `grep -r "service_role" .next/static` retorna vazio. Os links de envio aceitam só http(s), sem iframe. Cada aprovação registra quem aprovou e quando.
+5. O link mágico usa allowlist de URLs de retorno. A newsletter exige e-mail confirmado e tem liga/desliga. A função SECURITY DEFINER de "excluir minha conta e dados" é testada e apaga todas as linhas do usuário.
+6. Termos e política atualizados no repositório antes do 1º e-mail. Rollback da Vercel testado (redeploy do deploy anterior com resposta 200).
+por quê: 2 votos BOA contra 1 MÁ. Os riscos do promotor (backup, inventário, RLS) viram condições verificáveis. A pausa é reversível e o dono autorizou por escrito, mas só depois do inventário. Coletar e-mails é difícil de desfazer, então o backup restaurado vem antes. O plano não muda de fase, porque as condições já bloqueiam o 1º e-mail.
+```
+Inventário (condição 1, 2026-10-17): grep no repositório não encontra uso do jarvis-stark fora de docs/. Na Vercel existe o projeto "jarvis-stark" (prj_8G7fvSR1VrgILyv8dXuvsTfap4q3), que provavelmente usa esse banco e sairia do ar. Aguardando o OK do dono depois deste inventário.
