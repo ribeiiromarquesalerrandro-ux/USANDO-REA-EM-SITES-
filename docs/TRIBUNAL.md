@@ -34,3 +34,17 @@ condições: 1. Nova proposta só após backup completo do banco atual restaurad
 3. Piloto: copiar (não mover) uma tabela de teste para o novo serviço, com contagens e checksums idênticos; banco atual segue ativo como rollback; credenciais novas com menor privilégio.
 por quê: Unanimidade 3x MÁ define a reprovação-base. O jurado marcou BLOQUEIO e a ideia é irreversível sem backup (regras 2 e 3), então não cabe aprovação. A economia é "suposta", sem número, e a mitigação só vale como pré-requisito de uma nova proposta.
 ```
+
+### CASO 001
+```
+CASO 001 | 2026-10-17 | Órbita vira site real (Next.js na Vercel + Supabase, ~15 funções)
+votos: promotor MÁ, defensor BOA (só em etapas), jurado MÁ (vira BOA com mitigações)
+custo e segurança (do jurado): construção ≈ US$4; recorrente até ~US$25/mês (Supabase) mais e-mail da newsletter; Vercel Hobby é só para uso não comercial. SEGURANÇA: BLOQUEIO (sem backup no plano grátis; código de terceiros em envios e experimentos; 3º projeto pode pausar jarvis-real ou jarvis-stark).
+VEREDITO: REPROVADA (o escopo completo com Supabase; a fase 1 estática pode ser proposta como novo caso)
+condições: 1. Nova proposta limitada à fase 1 estática: Next.js com dados em JSON no repo, sem login, sem newsletter e sem Supabase. Verificável por `npm run build` sem erro, ausência de `@supabase/supabase-js` no package.json e PASSOU do tester.
+2. Cena 3D portada para o pacote npm `three`. Verificável por não haver `<script src>` de CDN no código e pela cena renderizando no teste.
+3. Antes de qualquer Supabase: o dono decide por escrito se um 3º projeto é aceitável (custo e pausa dos existentes). Nada é pausado sem essa decisão.
+4. Antes de coletar e-mails: backup `pg_dump` restaurado com sucesso, RLS ativo em todas as tabelas (`pg_tables.rowsecurity` = true), service role fora do bundle do cliente (`grep -r service_role .next/static` sem resultado), termos e política publicados, confirmação dupla e caminho de remoção.
+5. Rollback testado ("promover deploy anterior" na Vercel) e envios ou experimentos de terceiros só em iframe com sandbox em domínio separado.
+por quê: A maioria (2 de 3) votou MÁ, e o BLOQUEIO do jurado impede aprovação simples. O escopo completo junta dados pessoais, custo incerto e risco aos projetos existentes, sem mitigação já verificável. A fase 1 estática, que o defensor e o promotor propõem, remove esses riscos e pode voltar como novo caso.
+```
