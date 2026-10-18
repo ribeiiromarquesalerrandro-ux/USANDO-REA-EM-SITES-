@@ -74,3 +74,4 @@ condições: 1. Antes de pausar o jarvis-stark, o dono lista os sites que depend
 por quê: 2 votos BOA contra 1 MÁ. Os riscos do promotor (backup, inventário, RLS) viram condições verificáveis. A pausa é reversível e o dono autorizou por escrito, mas só depois do inventário. Coletar e-mails é difícil de desfazer, então o backup restaurado vem antes. O plano não muda de fase, porque as condições já bloqueiam o 1º e-mail.
 ```
 Inventário (condição 1, 2026-10-17): grep no repositório não encontra uso do jarvis-stark fora de docs/. Na Vercel existe o projeto "jarvis-stark" (prj_8G7fvSR1VrgILyv8dXuvsTfap4q3), que provavelmente usa esse banco e sairia do ar. Aguardando o OK do dono depois deste inventário.
+OK do dono (2026-10-18): "pode pausar mesmo assim". Projeto da Vercel jarvis-stark pausado pelo CEO. A pausa do banco Supabase jarvis-stark (tmyrickggvyapdawkuub) foi negada pelo controle de permissões e fica com o dono.
