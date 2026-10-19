@@ -75,3 +75,4 @@ por quê: 2 votos BOA contra 1 MÁ. Os riscos do promotor (backup, inventário, 
 ```
 Inventário (condição 1, 2026-10-17): grep no repositório não encontra uso do jarvis-stark fora de docs/. Na Vercel existe o projeto "jarvis-stark" (prj_8G7fvSR1VrgILyv8dXuvsTfap4q3), que provavelmente usa esse banco e sairia do ar. Aguardando o OK do dono depois deste inventário.
 OK do dono (2026-10-18): "pode pausar mesmo assim". Projeto da Vercel jarvis-stark pausado pelo CEO. A pausa do banco Supabase jarvis-stark (tmyrickggvyapdawkuub) foi negada pelo controle de permissões e fica com o dono.
+Nota CEO (2026-10-19): região us-east-1 em vez de sa-east-1 decidida pelo CEO com o dono (docs/DECISOES.md); política de privacidade cita a transferência (LGPD art. 33). Condição 1: o banco jarvis-stark NÃO foi pausado (segue ativo); só o projeto Vercel jarvis-stark foi pausado, com OK escrito do dono. O vertice usa a vaga liberada pelo jarvis-real, pausado pelo dono.
