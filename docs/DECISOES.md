@@ -60,3 +60,4 @@ data | decisão | motivo | fonte
 2026-10-17 | 2FA ativo na conta Vercel (confirmado pelo dono). Fase 1 do Vértice concluída: as 6 condições do CASO 002 atendidas (a 1ª publicação saiu direto em produção; as seguintes passaram por prévia) | condição 6 do CASO 002 | conversa
 2026-10-17 | CASO 003 (fase 2 com Supabase) APROVADA COM CONDIÇÕES; pausa do jarvis-stark aguarda o OK do dono após o inventário | veredito em docs/TRIBUNAL.md | tribunal
 2026-10-19 | Manter o Supabase "vertice" em us-east-1 (não sa-east-1) | Projeto vazio criado pelo dono nos EUA; recriar exigiria apagar. Latência extra ~100 ms só nas ações de conta; a política de privacidade deve citar a transferência internacional (LGPD art. 33) | dono + CEO
+2026-10-20 | Aceitar o aviso do Supabase sobre eh_admin() e email_confirmado() executáveis por authenticated | As duas só respondem sobre o próprio usuário (auth.uid()), sem dado de terceiros; as policies precisam delas | CEO
